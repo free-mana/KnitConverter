@@ -17,33 +17,16 @@
  *
  */
 
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.ss.util.CellUtil;
 import org.apache.poi.xssf.usermodel.*;
 import org.apache.poi.xssf.usermodel.extensions.XSSFCellBorder;
-import org.apache.xmlbeans.*;
-import org.openxmlformats.schemas.drawingml.x2006.main.CTSRgbColor;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTColors;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTIndexedColors;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTMRUColors;
-import org.w3c.dom.Node;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.SAXException;
-import org.xml.sax.ext.LexicalHandler;
 
 import javax.imageio.ImageIO;
-import javax.xml.namespace.QName;
-import javax.xml.stream.XMLStreamReader;
-import java.awt.*;
 import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 import java.io.*;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
 public class KnitConverter{
     public static void main(String[] args){
@@ -79,78 +62,125 @@ public class KnitConverter{
     }
 
     public static void makeXLSX(BufferedImage img){
-        Workbook wb = new XSSFWorkbook();
+        XSSFWorkbook wb = new XSSFWorkbook();
         Raster raster = img.getData();
         int array[] = new int[3];
+        byte cArray[] = new byte[3];
         Sheet chart = wb.createSheet("chart");
-        XSSFColor gray = new XSSFColor(new Color(128, 128, 128), new DefaultIndexedColorMap());
-        XSSFCellStyle white = (XSSFCellStyle)wb.createCellStyle();
-        white.setFillForegroundColor(new XSSFColor(new Color(255, 255, 255), new DefaultIndexedColorMap()));
-        white.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        white.setBorderBottom(BorderStyle.THIN);
-        white.setBorderLeft(BorderStyle.THIN);
-        white.setBorderRight(BorderStyle.THIN);
-        white.setBorderTop(BorderStyle.THIN);
-        white.setBorderColor(XSSFCellBorder.BorderSide.BOTTOM, gray);
-        white.setBorderColor(XSSFCellBorder.BorderSide.LEFT, gray);
-        white.setBorderColor(XSSFCellBorder.BorderSide.RIGHT, gray);
-        white.setBorderColor(XSSFCellBorder.BorderSide.TOP, gray);
-        XSSFCellStyle black = (XSSFCellStyle)wb.createCellStyle();
-        black.setFillForegroundColor(new XSSFColor(new Color(0,0,0), new DefaultIndexedColorMap()));
-        black.setFillPattern(FillPatternType.SOLID_FOREGROUND);
-        black.setBorderBottom(BorderStyle.THIN);
-        black.setBorderLeft(BorderStyle.THIN);
-        black.setBorderRight(BorderStyle.THIN);
-        black.setBorderTop(BorderStyle.THIN);
-        black.setBorderColor(XSSFCellBorder.BorderSide.BOTTOM, gray);
-        black.setBorderColor(XSSFCellBorder.BorderSide.LEFT, gray);
-        black.setBorderColor(XSSFCellBorder.BorderSide.RIGHT, gray);
-        black.setBorderColor(XSSFCellBorder.BorderSide.TOP, gray);
+        IndexedColorMap colorMap = new DefaultIndexedColorMap();
+        XSSFColor white = new XSSFColor(new Color(255, 255, 255), colorMap);    // #FFFFFF
+        XSSFColor lightGray = new XSSFColor(new Color(191,191,191), colorMap);  // #DFDFDF
+        XSSFColor gray = new XSSFColor(new Color(127, 127, 127), colorMap);     // #7F7F7F
+        XSSFColor darkGray = new XSSFColor(new Color(63,63,63), colorMap);      // #3F3F3F
+        XSSFColor black = new XSSFColor(new Color(0, 0, 0), colorMap);          // #000000
+        XSSFColor red = new XSSFColor(new Color(255, 0, 0), colorMap);          // #FF0000
+        XSSFColor scarlet = new XSSFColor(new Color(255,63,0), colorMap);       // #FF3F00
+        XSSFColor orange = new XSSFColor(new Color(255, 127, 0), colorMap);     // #FF7F00
+        XSSFColor gold = new XSSFColor(new Color(255,191,0), colorMap);         // #FFDF00
+        XSSFColor yellow = new XSSFColor(new Color(255, 255, 0), colorMap);     // #FFFF00
+        XSSFColor lime = new XSSFColor(new Color(127,255,0), colorMap);         // #7FFF00
+        XSSFColor green = new XSSFColor(new Color(0,255,0), colorMap);          // #00FF00
+        XSSFColor seaGreen = new XSSFColor(new Color(0,255,127), colorMap);     // #00FF7F
+        XSSFColor cyan = new XSSFColor(new Color(0,255,255), colorMap);         // #00FFFF
+        XSSFColor cornflower = new XSSFColor(new Color(0,127,255), colorMap);   // #007FFF
+        XSSFColor blue = new XSSFColor(new Color(0,0,255), colorMap);           // #0000FF
+        XSSFColor indigo = new XSSFColor(new Color(63,0,255), colorMap);        // #3F00FF
+        XSSFColor purple = new XSSFColor(new Color(127,0,255), colorMap);       // #7F00FF
+        XSSFColor purpleMagenta = new XSSFColor(new Color(191,0,255), colorMap);// #DF00FF
+        XSSFColor magenta = new XSSFColor(new Color(255,0,255), colorMap);      // #FF00FF
+        XSSFColor magentaRed = new XSSFColor(new Color(255,0,127), colorMap);   // #FF007F
+        XSSFCellStyle styleWhite = makeStyle(wb, white, gray);
+        XSSFCellStyle styleLightGray = makeStyle(wb, lightGray, darkGray);
+        XSSFCellStyle styleGray = makeStyle(wb, gray, black);
+        XSSFCellStyle styleDarkGray = makeStyle(wb, darkGray, lightGray);
+        XSSFCellStyle styleBlack = makeStyle(wb, black, gray);
+        XSSFCellStyle styleRed = makeStyle(wb, red, gray);
+        XSSFCellStyle styleScarlet = makeStyle(wb, scarlet, gray);
+        XSSFCellStyle styleOrange = makeStyle(wb, orange, gray);
+        XSSFCellStyle styleGold = makeStyle(wb, gold, gray);
+        XSSFCellStyle styleYellow = makeStyle(wb, yellow, gray);
+        XSSFCellStyle styleLime = makeStyle(wb, lime, gray);
+        XSSFCellStyle styleGreen = makeStyle(wb, green, gray);
+        XSSFCellStyle styleSeaGreen = makeStyle(wb, seaGreen, gray);
+        XSSFCellStyle styleCyan = makeStyle(wb, cyan, gray);
+        XSSFCellStyle styleCornflower = makeStyle(wb, cornflower, gray);
+        XSSFCellStyle styleBlue = makeStyle(wb, blue, gray);
+        XSSFCellStyle styleIndigo = makeStyle(wb, indigo, gray);
+        XSSFCellStyle stylePurple = makeStyle(wb, purple, gray);
+        XSSFCellStyle stylePurpleMagenta = makeStyle(wb, purpleMagenta, gray);
+        XSSFCellStyle styleMagenta = makeStyle(wb, magenta, gray);
+        XSSFCellStyle styleMagentaRed = makeStyle(wb, magentaRed, gray);
+
         int maxI = 0;
         int maxJ = 0;
         for(int i = 0; i < img.getHeight(); i++){
             maxI = i;
-            Row r = chart.createRow(i);
+            Row row = chart.createRow(i);
             for(int j = 0; j < img.getWidth(); j++){
                 maxJ = j;
-                Cell c = r.createCell(j);
+                Cell c = row.createCell(j);
                 array = raster.getPixel(j, i, array);
-                String red = Integer.toHexString(array[0]);
-                if(red.length() % 2 == 1){
-                    red = "0" + red;
-                }
-                String green = Integer.toHexString(array[1]);
-                if(green.length() % 2 == 1){
-                    green = "0" + green;
-                }
-                String blue = Integer.toHexString(array[2]);
-                if(blue.length() % 2 == 1){
-                    blue = "0" + blue;
-                }
-                String rgb = red + green + blue;
-                //c.setCellValue(rgb);
-                if(rgb.equals("ffffff")){
-                    c.setCellStyle(white);
+
+                if(array[0] == -1){
+                    cArray[0] = (byte)255;
                 }else{
-                    c.setCellStyle(black);
+                    cArray[0] = (byte)array[0];
                 }
-//                try{
-//                    byte bytes[] = Hex.decodeHex(rgb);
-//                    CTSRgbColor color = CTSRgbColor.Factory.newInstance();
-//                    color.setVal(bytes);
-//                    System.out.println(Arrays.toString(color.getAlphaArray()));
-//                    CTColors ctColors = CTColors.Factory.newInstance();
-//                    CTIndexedColors ctIndexedColors = CTIndexedColors.Factory.newInstance();
-//                    ctIndexedColors.addNewRgbColor().setRgb(bytes);
-//                    ctColors.setIndexedColors(ctIndexedColors);
-//                    CustomIndexedColorMap colorMap = CustomIndexedColorMap.fromColors(ctColors);
-//                    Map<String, Object> map = new HashMap<>();
-//                    map.put(CellUtil.FILL_FOREGROUND_COLOR, new XSSFColor(new java.awt.Color(255, 255, 255), new DefaultIndexedColorMap()));
-//                    map.put(CellUtil.FILL_PATTERN, FillPatternType.SOLID_FOREGROUND);
-//                    CellUtil.setCellStyleProperties(c, map);
-//                }catch(DecoderException e){
-//                    e.printStackTrace();
-//                }
+                if(array[1] == -1){
+                    cArray[1] = (byte)255;
+                }else{
+                    cArray[1] = (byte)array[1];
+                }
+                if(array[2] == -1){
+                    cArray[2] = (byte)255;
+                }else{
+                    cArray[2] = (byte)array[2];
+                }
+                if(Arrays.equals(cArray, white.getRGB())){
+                    c.setCellStyle(styleWhite);
+                }else if(Arrays.equals(cArray, lightGray.getRGB())){
+                    c.setCellStyle(styleLightGray);
+                }else if(Arrays.equals(cArray, gray.getRGB())){
+                    c.setCellStyle(styleGray);
+                }else if(Arrays.equals(cArray, darkGray.getRGB())){
+                    c.setCellStyle(styleDarkGray);
+                }else if(Arrays.equals(cArray, black.getRGB())){
+                    c.setCellStyle(styleBlack);
+                }else if(Arrays.equals(cArray, red.getRGB())){
+                    c.setCellStyle(styleRed);
+                }else if(Arrays.equals(cArray, scarlet.getRGB())){
+                    c.setCellStyle(styleScarlet);
+                }else if(Arrays.equals(cArray, orange.getRGB())){
+                    c.setCellStyle(styleOrange);
+                }else if(Arrays.equals(cArray, gold.getRGB())){
+                    c.setCellStyle(styleGold);
+                }else if(Arrays.equals(cArray, yellow.getRGB())){
+                    c.setCellStyle(styleYellow);
+                }else if(Arrays.equals(cArray, lime.getRGB())){
+                    c.setCellStyle(styleLime);
+                }else if(Arrays.equals(cArray, green.getRGB())){
+                    c.setCellStyle(styleGreen);
+                }else if(Arrays.equals(cArray, seaGreen.getRGB())){
+                    c.setCellStyle(styleSeaGreen);
+                }else if(Arrays.equals(cArray, cyan.getRGB())){
+                    c.setCellStyle(styleCyan);
+                }else if(Arrays.equals(cArray, cornflower.getRGB())){
+                    c.setCellStyle(styleCornflower);
+                }else if(Arrays.equals(cArray, blue.getRGB())){
+                    c.setCellStyle(styleBlue);
+                }else if(Arrays.equals(cArray, indigo.getRGB())){
+                    c.setCellStyle(styleIndigo);
+                }else if(Arrays.equals(cArray, purple.getRGB())){
+                    c.setCellStyle(stylePurple);
+                }else if(Arrays.equals(cArray, purpleMagenta.getRGB())){
+                    c.setCellStyle(stylePurpleMagenta);
+                }else if(Arrays.equals(cArray, magenta.getRGB())){
+                    c.setCellStyle(styleMagenta);
+                }else if(Arrays.equals(cArray, magentaRed.getRGB())){
+                    c.setCellStyle(styleMagentaRed);
+                }else{
+                    System.out.println("unknown color, cArray = " + Arrays.toString(cArray));
+                }
             }
         }
         int cur = maxI + 1;
@@ -175,5 +205,25 @@ public class KnitConverter{
         }catch(IOException e){
             e.printStackTrace();
         }
+    }
+    private static void setBorders(XSSFColor borderColor, XSSFCellStyle style){
+        style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        style.setBorderBottom(BorderStyle.THIN);
+        style.setBorderLeft(BorderStyle.THIN);
+        style.setBorderRight(BorderStyle.THIN);
+        style.setBorderTop(BorderStyle.THIN);
+        style.setBorderColor(XSSFCellBorder.BorderSide.BOTTOM, borderColor);
+        style.setBorderColor(XSSFCellBorder.BorderSide.LEFT, borderColor);
+        style.setBorderColor(XSSFCellBorder.BorderSide.RIGHT, borderColor);
+        style.setBorderColor(XSSFCellBorder.BorderSide.TOP, borderColor);
+    }
+    private static XSSFCellStyle makeStyle(XSSFWorkbook wb, XSSFColor color, XSSFColor borderColor){
+        XSSFCellStyle result = wb.createCellStyle();
+        result.setFillForegroundColor(color);
+        if(borderColor != null){
+            setBorders(borderColor, result);
+        }
+        result.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        return result;
     }
 }
