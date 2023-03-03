@@ -1,6 +1,6 @@
-# KnitConverter
+# main.java.KnitConverter
 
-KnitConverter is a tool to convert image files to spreadsheets for use as colorwork knitting charts.
+main.java.KnitConverter is a tool to convert image files to spreadsheets for use as colorwork knitting charts.
 
 # Features
 
